@@ -19,18 +19,17 @@ class BookController extends Controller
             return $query->title($title);
         });
 
-        $books = match($filter) {
-            'popular_last_month'=>$books->popularLastMonth(),
-            'popular_last_6months'=>$books->popularLastMonth(),
-            'highest_rated_last_month'=>$books->popularLastMonth(),
-            'highest_rated_last_6months'=>$books->popularLastMonth(),
+        $books = match ($filter) {
+            'popular_last_month' => $books->popularLastMonth(),
+            'popular_last_6months' => $books->popularLastMonth(),
+            'highest_rated_last_month' => $books->popularLastMonth(),
+            'highest_rated_last_6months' => $books->popularLastMonth(),
             default => $books->latest(),
         };
 
         $books = $books->get();
 
         return view('books.index', compact('books'));
-
     }
 
     /**
@@ -52,9 +51,14 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Book $book)
     {
-        //
+
+        return view('books.show', [
+            'book' => $book->load([
+                'reviews' => fn($query) => $query->latest()
+            ])
+        ]);
     }
 
     /**
