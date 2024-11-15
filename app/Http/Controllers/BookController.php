@@ -29,8 +29,8 @@ class BookController extends Controller
         };
 
 
-        $cacheKey = 'books:'.$filter.':'.$title;
-        $books = cache()->remember($cacheKey, 3600, fn()=>$books->get());
+        $cacheKey = 'books:' . $filter . ':' . $title;
+        $books = cache()->remember($cacheKey, 3600, fn() => $books->get());
 
         return view('books.index', compact('books'));
     }
@@ -54,15 +54,20 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show(int $id)
     {
-        $cacheKey = 'book:'.$book->id;
+        $cacheKey = 'book:' . $id;
 
-        $book = cache()->remember($cacheKey, 3600, fn()=>$book->load([
-            'reviews' => fn($query) => $query->latest()
-        ]));
+        $book = cache()->remember(
+            $cacheKey,
+            3600,
+            fn() =>
+            Book::with([
+                'reviews' => fn($query) => $query->latest()
+            ])->withAvgRating()->withReviewsCount()->findOrFail($id)
+        );
 
-        return view('books.show', ['book' =>$book]);
+        return view('books.show', ['book' => $book]);
     }
 
     /**
